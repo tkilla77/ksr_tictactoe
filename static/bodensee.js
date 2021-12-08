@@ -14,10 +14,13 @@ async function requestTemp () {
       json = await response.json();
       const key = 134;
       tempBodensee.textContent = json[key].temp + '°C';
+      console.log("update HTML " + Date.now());
     }
   } catch (x) {
     console.log('Cannot fetch ' + url + ', status: ' + x);
   }
 };
 
+console.log("requestTemp start " + Date.now());
 requestTemp();
+console.log("requestTemp end " + Date.now());
