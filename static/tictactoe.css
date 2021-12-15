@@ -1,0 +1,31 @@
+body {
+    max-width: 60em;
+    margin: auto auto;
+    padding: 1em 1em;
+}
+
+div.grid {
+    max-height: 70vh;
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-gap: 3%;
+    border: 1em solid rgb(44, 53, 75);
+    border-radius: 1em;
+    background-color: rgb(44, 53, 75);
+}
+
+.grid button {
+    border: 0;
+    color: white;
+    font-weight: bold;
+    font-size: 4em;
+}
+
+.grid button[data-state="X"] {  
+    background-color: rgb(111, 129, 177);
+}
+.grid button[data-state="O"] {
+    background-color: rgb(31, 42, 70);
+}

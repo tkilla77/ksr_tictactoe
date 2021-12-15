@@ -9,9 +9,13 @@ async function requestTemp () {
     // nebenläufige Berechnung wird mit einer Promise verfolgt.
     // Wird die Promise fulfilled, wird die response-Variable
     // gesetzt und der weitere Code ausgeführt.
-    response = await fetch(url);
+    fetchPromise = fetch(url);
+    console.log("HTTP fetch started " + Date.now());
+    response = await fetchPromise;
+    console.log("HTTP fetch completed " + Date.now());
     if (response.ok) {
       json = await response.json();
+      console.log("JSON parse completed " + Date.now());
       const key = 134;
       tempBodensee.textContent = json[key].temp + '°C';
       console.log("update HTML " + Date.now());
