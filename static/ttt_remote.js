@@ -1,8 +1,10 @@
 /** A HTML view of a TicTacToe game. */
 class TttView {
     /** Creates a new view using the the given grid. */
-    constructor(grid) {
+    constructor(grid, status, log) {
         this.grid = grid;
+        this.status = status;
+        this.log = log;
     }
 
     /**
@@ -10,7 +12,7 @@ class TttView {
      */
     updateHtml(json) {
         let i = 0;
-        
+
         for (const button of this.grid.getElementsByTagName("button")) {
             const cellText = json.field[i];
             // Set the data-state attribute which drives CSS formatting.
@@ -25,6 +27,19 @@ class TttView {
             }
             i++;
         }
+    }
+
+    updateStatus(statusText) {
+        this.status.textContent = statusText;
+    }
+
+    addToLog(logText) {
+        if (this.log.childNodes.length >= 5) {
+            this.log.lastChild.remove();
+        }
+        let logstatement = document.createElement("logstatement");
+        logstatement.textContent = logText;
+        this.log.prepend(logstatement);
     }
 }
 
@@ -51,26 +66,38 @@ class TttController {
         }
     }
 
-    async fetchCurrentGame() {
-        this.handleJsonUrl(`/view/${this.game_id}/${this.player}`);
-    }
-
+    /**
+     * Fetches the given URL and updates the internal state from the parsed JSON.
+     * 
+     * Keeps polling for updates if the updated state could change remotely.
+     * 
+     * @param {string} url the URL to fetch that will return tictactoe JSON.
+     */
     async handleJsonUrl(url) {
         try {
             let response = await fetch(url);
             await this.handleJsonResponse(response);
+            // Keep polling the server while the game state could change remotely.
             if (this.state == "WAITING" || (this.state == "PLAYING" && this.next != this.player)) {
                 await this.wait(1000);
-                this.fetchCurrentGame();
+                this.handleJsonUrl(`/view/${this.game_id}/${this.player}`);
             }
         } catch (exception) {
             console.log(exception);
+            this.view.addToLog(exception.toString());
         }
     }
 
+    /**
+     * Updates the game state from the JSON response received from a remote HTTP endpoint.
+     *
+     * @param {Response} response the HTTP response from a remote JSON endpoint.
+     */
     async handleJsonResponse(response) {
         if (!response.ok) {
-            console.log("Error: " + await response.text());
+            let error =  await response.text();
+            console.log("Error: " + error);
+            this.view.addToLog(error);
             return;
         }
         const json = await response.json();
@@ -78,6 +105,12 @@ class TttController {
         this.next = json.next;
         this.game_id = json.id;
         this.state = json.state;
+        if (this.state == "PLAYING") {
+            const ourOrTheir = this.next == this.player ? "our" : "their";
+            this.view.updateStatus(`${json.state}: ${ourOrTheir} turn`);
+        } else {
+            this.view.updateStatus(`${json.state}`);
+        }
         this.view.updateHtml(json);
     }
 
@@ -87,5 +120,7 @@ class TttController {
     }
 }
 
-let view = new TttView(document.getElementsByClassName("grid")[0])
+let view = new TttView(document.getElementsByClassName("grid")[0],
+                       document.getElementById("status"),
+                       document.getElementById("log"))
 let controller = new TttController(view);

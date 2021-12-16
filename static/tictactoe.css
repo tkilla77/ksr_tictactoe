@@ -29,3 +29,13 @@ div.grid {
 .grid button[data-state="O"] {
     background-color: rgb(31, 42, 70);
 }
+
+.statusarea {
+    font-family: system-ui;
+    margin: 1em;
+}
+
+logstatement {
+    display: block;
+    font-family: monospace;
+}
