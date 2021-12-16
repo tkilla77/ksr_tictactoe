@@ -1,54 +1,71 @@
+/** A HTML view of a TicTacToe game. */
 class TttView {
+    /** Creates a new view using the the given grid. */
     constructor(grid) {
         this.grid = grid;
     }
+
+    /**
+     * Updates the HTML to match the game state given as JSON.
+     */
+    updateHtml(json) {
+        let i = 0;
+        
+        for (const button of this.grid.getElementsByTagName("button")) {
+            const cellText = json.field[i];
+            button.setAttribute('data-state', cellText);
+            button.textContent = cellText;
+            if (cellText != ' ') {
+                button.setAttribute('disabled', "1");
+            } else {
+                button.removeAttribute('disabled');
+            }
+            i++;
+        }
+    }
 }
 
+/** A controller for a TicTacToe game, managing the connection to the server. */
 class TttController {
     constructor(view) {
         this.view = view;
 
-        // TODO find out which player we are.
-        this.player = 1;
+        this.init();
+    }
+
+    /**
+     * Fetches the game state, updates the UI, and installs click handlers.
+     */
+    async init() {
+        try {
+            let response = await fetch(`/join`);
+            let json = await response.json();
+            this.player = json.player;
+            this.next = json.next;
+            this.game_id = json.id;
+            this.view.updateHtml(json);
+        } catch (exception) {
+            console.log(exception);
+        }
 
         let i = 0;
-        for (const button of view.grid.getElementsByTagName("button")) {
+        for (const button of this.view.grid.getElementsByTagName("button")) {
             const cell = i;
             button.addEventListener('click', () => {
                 this.onClick(cell);
-            });   
+            });
             i++;
         }
     }
+
     async onClick(cell) {
         try {
-            response = await fetch(`/set/${this.player}/${cell}`);
-            json = await response.json();
-            let i = 0;
-            for (const button of this.view.grid.getElementsByTagName("button")) {
-                let color = '?';
-                disabled = false;
-                if (json.field[i] == 0) {
-                    color = ' ';
-                } else if (json.field[i] == 1) {
-                    color = 'X';
-                    disabled = true;
-                } else if (json.field[i] == 2) {
-                    color = 'O';
-                    disabled = true;
-                } else {
-                    color = '?';
-                }
-
-                button.setAttribute('data-state', color);
-                button.textContent = color;
-                if (disabled) {
-                    button.setAttribute('disabled', "1");
-                }
-                i++;
-            }
+            let response = await fetch(`/set/${this.game_id}/${this.player}/${cell}`);
+            let json = await response.json();
+            this.next = json.next;
+            this.view.updateHtml(json)
         } catch (exception) {
-            // TODO handle problems
+            console.log(exception);
         }
     }
 
