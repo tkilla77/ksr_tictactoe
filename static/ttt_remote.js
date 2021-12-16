@@ -105,11 +105,18 @@ class TttController {
         this.next = json.next;
         this.game_id = json.id;
         this.state = json.state;
+        this.winner = json.winner;
         if (this.state == "PLAYING") {
             const ourOrTheir = this.next == this.player ? "our" : "their";
             this.view.updateStatus(`${json.state}: ${ourOrTheir} turn`);
+        } else if (this.winner == this.player) {
+            this.view.updateStatus("You won");
+        } else if (this.winner != " ") {
+            this.view.updateStatus("You lost");
+        } else if (this.state == "TIE") {
+            this.view.updateStatus("Tie");
         } else {
-            this.view.updateStatus(`${json.state}`);
+            this.view.updateStatus(json.state);
         }
         this.view.updateHtml(json);
     }
