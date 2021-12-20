@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, url_for, redirect, session, abort
 from tictactoe import *
+import uuid
  
 app = Flask(__name__)
 app.logger.setLevel("DEBUG")
@@ -7,36 +8,14 @@ app.logger.setLevel("DEBUG")
 app.secret_key = b'_5#y2L"F23Q8z\n\xec]/'
 
 games = []
-def addGameToSession(game, player, session):
-    """Records the game in the user's session cookie.
-    For each game id, we store the set of players the user has in this game.
-    """
-    assert game.isWaiting(), "Cannot join a game that is not waiting"
-    game_id = str(game.id)
-    if 'games' in session:
-        game_ids = session['games']
-        if type(game_ids) != dict:
-            session['games'] = {game_id: [player]}
-        elif game_id not in game_ids or type(game_ids[game_id]) != list:
-            game_ids[game_id] = [player]
-        elif player not in game_ids[game_id]:
-            game_ids[game_id].append(player)
-        session.modified = True
-    else:
-        session['games'] = {game_id: [player]}
 
-def checkGameInSession(game_id, player, session):
-    """Ensures the game id is already recorded in the user's session cookie."""
-    game_id_str = str(game_id)
-    session_games = session.get('games', {})
-    if not game_id_str in session_games:
-        raise Exception("Not your game, go away!")
-    players = session_games[game_id_str]
-    if not (player) in players:
-        raise Exception("You're not this player, go away!")
-    if not game_id in games:
-        raise Exception("Unknown game!")
-    
+def getPlayerId(session):
+    player_id = session.get('ttt_uuid', None)
+    if not player_id:
+        player_id = uuid.uuid1().hex
+        session['ttt_uuid'] = player_id
+    return player_id
+
 
 @app.route("/")
 def root():
@@ -45,19 +24,18 @@ def root():
 @app.route("/join")
 def join():
     """Joins a game that is waiting for players, or creates a new one."""
-    
+    player_id = getPlayerId(session)
     for game in games:
         if game.isWaiting():
-            addGameToSession(game, PLAYER_2, session)
             app.logger.debug(f"Joining game {game.id}")
-            game.join(PLAYER_2)
+            game.join(player_id)
             return jsonify(game.getState(PLAYER_2))
     # No game waiting
     game_id = len(games)
     game = TicTacToe(game_id)
-    app.logger.debug(f"Creating new game {game.id}")
     games.append(game)
-    addGameToSession(game, PLAYER_1, session)
+    app.logger.debug(f"Creating new game {game.id}")
+    game.join(player_id)
     return jsonify(game.getState(PLAYER_1))
 
 @app.route("/view/<int:game_id>/<player>")
@@ -77,8 +55,9 @@ def set(game_id, player, cell):
     turn.
     """
     try:
-        checkGameInSession(game_id, player, session)
         game = games[game_id]
+        if getPlayerId(session) != game.getPlayerUuid(player):
+            raise Exception("Not your game, my friend")
         game.setField(player, cell)
         return jsonify(game.getState(player))
     except Exception as e:

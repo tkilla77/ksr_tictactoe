@@ -21,6 +21,8 @@ class TicTacToe:
         self.next = PLAYER_1
         self.state = STATE_WAITING
         self.winner = EMPTY
+        self.player1 = None
+        self.player2 = None
 
     def getState(self, player):
         """Returns a dictionary capturing the entire state of this game,
@@ -43,11 +45,24 @@ class TicTacToe:
     def isPlaying(self):
         return self.state == STATE_PLAYING
 
-    def join(self, player):
-        if not self.isWaiting():
-            raise Exception("Game is not waiting for players")
-        self.state = STATE_PLAYING
+    def getPlayerUuid(self, player):
+        if player == PLAYER_1:
+            return self.player1
+        elif player == PLAYER_2:
+            return self.player2
+        else:
+            raise Exception("Unknown player")
 
+    def join(self, uuid):
+        assert uuid, "Invalid player"
+        if not self.player1:
+            self.player1 = uuid
+        elif not self.player2:
+            self.player2 = uuid
+            self.state = STATE_PLAYING
+        else:
+            raise Exception("Game is not waiting for players")
+    
     def setField(self, player, cell):
         """Attempts to set the given cell for the given player, raising an
         exception if the arguments are invalid or the move is illegal.
