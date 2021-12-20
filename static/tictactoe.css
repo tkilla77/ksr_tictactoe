@@ -11,7 +11,7 @@ div.grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    grid-gap: 3%;
+    grid-gap: 1em;
     border: 1em solid rgb(44, 53, 75);
     border-radius: 1em;
     background-color: rgb(44, 53, 75);
