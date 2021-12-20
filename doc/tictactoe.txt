@@ -1,0 +1,58 @@
+title TicTacToe
+
+actor User
+participantgroup #c0e0ff **Browser**
+participant Foreground Thread
+participant Background Thread
+end
+participantgroup #c0ffc0 
+participant Server
+end
+
+User->Foreground Thread:Open "localhost:5000"
+activate Background Thread
+expandable+ Load Static Resources
+Background Thread->(1)Server:GET /
+Server->(1)Background Thread:302 redirect\n/static/tictactoe.html
+Background Thread->(1)Server:GET /static/tictactoe.html
+Server->(1)Background Thread:200 OK\nserves //static/tictactoe.html//
+note over Background Thread:Parse HTML\nfind other resources to load
+Background Thread->(1)Server:GET /static/tictactoe.css
+Server->(1)Background Thread:200 OK\nserves //static/tictactoe.css//
+Background Thread->(1)Server:GET /static/tictactoe.js
+Server->(1)Background Thread:200 OK\nserves //static/tictactoe.js//
+end
+Background Thread->Foreground Thread:Update HTML
+deactivateafter Background Thread
+Foreground Thread->User:Show website
+
+activate Background Thread
+expandable− JS fetch
+Background Thread->(1)Server:POST /join
+Server->(1)Background Thread:200 OK\n{ "id": 1, "player": "X"... }
+note over Background Thread:Parse JSON
+end
+Background Thread->Foreground Thread:Update HTML
+deactivateafter Background Thread
+Foreground Thread->User:Show updated website
+
+User->Foreground Thread:Click cell
+activate Background Thread
+expandable+ JS fetch
+Background Thread->(1)Server:POST /set/1/X/4
+Server->(1)Background Thread:200 OK\n{ "id": 1, "next": "O"... }
+note over Background Thread:Parse JSON
+end
+Background Thread->Foreground Thread:Update HTML
+deactivateafter Background Thread
+Foreground Thread->User:Show updated website
+
+activate Background Thread
+expandable+ JS fetch\nuntil updated
+Background Thread->(1)Server:POST /view/1/X
+Server->(1)Background Thread:200 OK\n{ "id": 1, "next": "O"... }
+note over Background Thread:Parse JSON
+end
+Background Thread->Foreground Thread:Update HTML
+deactivateafter Background Thread
+Foreground Thread->User:Show updated website
