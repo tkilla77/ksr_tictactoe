@@ -56,3 +56,25 @@ When the user navigates to the root of the web server, the following happens:
     1. The background JS uses `fetch` to load the `/set/<game_id>/<player>/<cell>` resource.
     2. The server checks the requests and if OK modifies the gamestate accordingly, returning JSON data for the updated game.
     3. The JSON data is parsed in the background thread and the HTML is updated accordingly
+
+## Security
+Since every machine with access to the server can request resources, the server should protect itself against unauthorized requests.
+
+### Semantic Checks
+The following may easily be checked for in the game logic:
+ * is it the user's turn?
+ * is the cell free at all?
+ * is the game still playing?
+
+### User Authorization
+But even more important is the question whether the request is even coming from the right user.
+ * Otherwise, a malicious user could issue a bad request on behalf of its competitor, resulting in a favorable game situation.
+
+Checking for whether the user is really who they claim is not easy. We could verify if the request comes from the same IP address as the initial `/join` request, but that can be forged. Also, this would not work if all clients reside behind the same NAT router, as they would all appear to come from the same address.
+
+#### Cookies
+The canonical answer to this problem is to use session cookies. In the response to the `/join` request, a small piece of data (cookie) is sent back to the client, and the client is asked to include that cookie in each of its subsequent requests.
+
+In order to not allow a malicious user to forge the cookie of another player, the cookie contents are encrypted.
+
+Flask provides [sessions](https://flask.palletsprojects.com/en/2.0.x/quickstart/#sessions), which are built on top of cookies, for this purpose.
