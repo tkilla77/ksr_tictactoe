@@ -14,7 +14,7 @@ The game consists of two systems: the server, and the client (web-browser).
 The loads static client-side resources (HTML, CSS, Javascript) from the server. The Javascript then uses asynchronous `fetch`to connect to the JSON
 endpoints defined by the server, in order to join a game, to view it's state, and to take turns in setting pieces.
 
-The server-side state of a game can change without a user event, for example, because the other player set a piece. In order to update the client's
+The server-side state of a game can change without a user event, e.g. because the other player set a piece. In order to update the client's
 view of the game, it continuously polls the server for the current game state using the `/view` endpoint.
 
 ### Server
@@ -25,10 +25,10 @@ The server has two roles:
 The server is implemented in Python, on top of the [Flask](https://flask.palletsprojects.com/) web app server.
 
 There are two main parts in the Python code:
-1. The logic for a single game of TicTacToe is defined in `tictactoe.py`.
-2. `app.py` defines the endpoints supported by the webapp
-    - The root (`/`) URL is redirected to `/static/tictactoe.html`
-    - Flask automagically serves any files from the `/static` folder as static resources.
+1. The logic for a single game of TicTacToe is defined in [`tictactoe.py`](tictactoe.py).
+2. [`app.py`](app.py) defines the endpoints supported by the webapp
+    - The root (`/`) URL is redirected to [`/static/tictactoe.html`](static/tictactoe.html)
+    - Flask automagically serves any files from the [`/static`](static) folder as static resources.
     - The three JSON endpoints are defined using `@app.route` annotations.
 
 ![Component Diagram](https://docs.google.com/drawings/d/e/2PACX-1vTaoCW1MssjbXILkxvU3BIN8QBO94_hvJ6JBzJu9j7Pc5z45ojASa4YycS2WTXnne-TKpcrB4ypK9UC/pub?w=665&h=464)
