@@ -77,3 +77,7 @@ function onClick(button) {
         alert("Won: " + winner);
     }
 }
+
+for (let button of document.querySelectorAll("button")) {
+    button.addEventListener("click", () => onClick(button));
+}
