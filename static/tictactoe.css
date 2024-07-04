@@ -35,6 +35,11 @@ div.grid {
     margin: 1em;
 }
 
+#log {
+    max-height: 10lh;
+    overflow-y: scroll;
+}
+
 logstatement {
     display: block;
     font-family: monospace;
