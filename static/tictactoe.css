@@ -21,7 +21,7 @@ div.grid {
     border: 0;
     color: white;
     font-weight: bold;
-    font-size: 20vmin;
+    font-size: 15vmin;
 }
 
 .grid button[data-state="X"] {  
