@@ -11,9 +11,9 @@ div.grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    grid-gap: 3%;
-    border: 1em solid rgb(44, 53, 75);
-    border-radius: 1em;
+    gap: 3vmin;
+    border: 3vmin solid rgb(44, 53, 75);
+    border-radius: 3vmin;
     background-color: rgb(44, 53, 75);
 }
 
@@ -21,7 +21,7 @@ div.grid {
     border: 0;
     color: white;
     font-weight: bold;
-    font-size: 4em;
+    font-size: 20vmin;
 }
 
 .grid button[data-state="X"] {  
