@@ -1,0 +1,18 @@
+{
+  "name": "ksr_tictactoe",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A game of TicTacToe as webapp. Two users load the client-side code (HTML, CSS, Javascript) from the server and can then play against each other. The game state is managed on the server, the client (browser) merely displays the state received from the server, and can issue commands to place a piece in a free cell.",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

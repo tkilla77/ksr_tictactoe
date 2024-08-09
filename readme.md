@@ -22,7 +22,16 @@ The server has two roles:
 1. It serves the static resources needed by the client (HTML, CSS, Javascript).
 2. It responds to queries to its JSON endpoints by returning the JSON data corresponding to the underlying game.
 
-The server is implemented in Python, on top of the [Flask](https://flask.palletsprojects.com/) web app server.
+The server is implemented in Javascript, on top of [Node.js](https://nodejs.org/) and [Express](https://expressjs.com/).
+
+#### Installing Node
+  * Install Node:
+    * https://nodejs.org/en/download/prebuilt-installer
+  * Initialize the project:
+     * `npm init`
+     * `npm install express`
+     * mark as `  "type": "module"` in `package.json'
+     * make sure to git-ignore `node-modules`
 
 There are two main parts in the Python code:
 1. The logic for a single game of TicTacToe is defined in [`tictactoe.py`](tictactoe.py).
