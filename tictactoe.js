@@ -48,12 +48,19 @@ export class TicTacToe {
         }
     }
 
-    toJson() {
+    toJson(userid) {
+        let player = undefined
+        if (this.#userIdX == userid) {
+            player = 'X'
+        } else if (this.#userId0 == userid) {
+            player = 'O'
+        }
         return {
             id: this.#id,
             state: this.#state.name,
             grid: this.#cells,
             winner: this.getWinner(),
+            player: player, 
             next: this.#next,
         };
     }
@@ -105,7 +112,6 @@ export class TicTacToe {
 
         for (const winner of winners) {
             const winningColor = this.isWinner(winner);
-            console.log(`Winner for ${winner} is ${winningColor}`)
             if (winningColor) {
                 return winningColor;
             }

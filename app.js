@@ -32,7 +32,7 @@ function findGame(req, res) {
 app.get('/game/:gameid', (req, res) => {
     let game = findGame(req, res)
     if (game != undefined) {
-        res.json(game.toJson())
+        res.json(game.toJson(getUserId(req, res)))
     }
 })
 
@@ -51,7 +51,7 @@ app.get('/join', (req, res) => {
     for (let game of Object.values(games)) {
         if (game.isWaiting()) {
             game.join(userid)
-            res.json(game.toJson())
+            res.json(game.toJson(userid))
             return
         }
     }
@@ -61,7 +61,7 @@ app.get('/join', (req, res) => {
     nextGameId += 1
     
     game.join(userid)
-    res.json(game.toJson())
+    res.json(game.toJson(userid))
 })
 
 app.get('/set/:gameid/:cell', (req, res) => {
@@ -69,7 +69,7 @@ app.get('/set/:gameid/:cell', (req, res) => {
     let game = findGame(req, res)
     if (game != undefined) {
         game.set(userid, req.params['cell'])
-        res.json(game.toJson())
+        res.json(game.toJson(userid))
     }
 })
 
