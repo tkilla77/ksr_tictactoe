@@ -40,9 +40,11 @@ export class TicTacToe {
         }
         if (this.#userIdX == undefined) {
             this.#userIdX = userId;
+            return 'X';
         } else if (this.#userId0 == undefined) {
             this.#userId0 = userId;
             this.#state = GameState.PLAYING;
+            return 'O';
         }
     }
 
