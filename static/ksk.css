@@ -1,0 +1,34 @@
+body {
+    background-color: lightblue;
+    font-family: sans-serif;
+}
+h1 {
+    color: darkblue;
+}
+h2 {
+    background-color: black;
+    color: white;
+    padding: 2mm;
+}
+h3 {
+    background-color: darkgray;
+    color: white;
+    padding: 2mm;
+}
+
+em {
+    text-decoration: underline;
+}
+
+strong {
+    color: darkblue;
+}
+
+ul, ol {
+    background-color: cornflowerblue;
+    padding-top: 2mm;
+    padding-bottom: 2mm;
+}
+img {
+    width: 100%;
+}
