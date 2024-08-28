@@ -25,7 +25,7 @@ async function requestTemp () {
   } catch (x) {
     console.log(`Cannot fetch ${url}, status: ${x}`);
   }
-};
+}
 
 console.log(`requestTemp start ${Date.now()}`);
 requestTemp();
