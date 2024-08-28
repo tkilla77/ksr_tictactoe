@@ -66,7 +66,24 @@ function getWinner(grid) {
     return undefined;
 }
 
+function isPlaying() {
+    let grid = document.querySelector("div.grid");
+    if (getWinner(grid)) {
+        return false;
+    }
+    for (let button of document.querySelectorAll("button")) {
+        if (!getColor(button)) {
+            return true;
+        }
+    }
+    // no more empty cells
+    return false;
+}
+
 function onClick(button) {
+    if (!isPlaying()) {
+        return;
+    }
     const color = getNext();
     button.setAttribute('data-state', color);
     button.innerHTML=color;
@@ -74,7 +91,9 @@ function onClick(button) {
 
     const winner = getWinner(button.parentNode);
     if (winner) {
-        alert("Won: " + winner);
+        document.querySelector("div#status").textContent = `Winner: ${winner}`;
+    } else if (!isPlaying()) {
+        document.querySelector("div#status").textContent = `Tie`;
     }
 }
 
