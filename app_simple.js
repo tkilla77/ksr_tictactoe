@@ -3,6 +3,7 @@ import express from 'express'
 const app = express()
 const port = 3000
 
+
 let game = {
     "id": 0,
     "state": {
@@ -12,8 +13,12 @@ let game = {
     "grid": [ " ", " ", " ", " ", " ", " ", " ", " ", " " ],
 };
 
-app.get('/game/', (req, res) => {
+function sendGame(req, res) {
     res.json(game);
+}
+
+app.get('/game/', (req, res) => {
+    sendGame(req, res);
 });
 
 app.get('/play/:cell/:color', (req, res) => {
@@ -34,7 +39,7 @@ app.get('/play/:cell/:color', (req, res) => {
     } else {
         game.state.next = 'X';
     }
-    res.json(game);
+    sendGame(req, res);
 });
 
 
