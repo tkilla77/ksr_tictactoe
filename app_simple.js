@@ -32,24 +32,34 @@ function getUserId(req, res) {
 // sets the 'player' entry according to
 // the user id.
 function sendGame(req, res) {
-    let copy = structuredClone(game)
-    delete copy['player_X']
-    delete copy['player_O']
+    // Join a game that is waiting for players.
     let userid = getUserId(req, res)
-    if (game['player_X'] == userid) {
-        // User is already assigned X
-        copy['player'] = 'X'
-    } else if (game['player_O'] == userid) {
-        // User is already assigned O
-        copy['player'] = 'O'
-    } else if (game['player_X'] == "") {
+    if (game['player_X'] == "") {
         // Join game as X
         game['player_X'] = userid
-        copy['player'] = 'X'
     } else if (game['player_O'] == "") {
         // Join game as O
         game['player_O'] = userid
-        copy['player'] = 'O'
+    }
+    
+    let copy = structuredClone(game)
+    delete copy['player_X']
+    delete copy['player_O']
+    copy['player'] = 'not you'
+    if (game['player_X'] == userid) {
+        // User is already assigned X
+        copy['color'] = 'X'
+        if (game.state.next == 'X') {
+            copy['player'] = 'you'
+        }
+    } else if (game['player_O'] == userid) {
+        // User is already assigned O
+        copy['color'] = 'O'
+        if (game.state.next == 'O') {
+            copy['player'] = 'you'
+        }
+    } else {
+        // game already has two other players
     }
     res.json(copy)
 }

@@ -1,133 +1,113 @@
-/** A HTML view of a TicTacToe game. */
-class TttView {
-    /** Creates a new view using the the given grid. */
-    constructor(grid, status, log) {
-        this.grid = grid;
-        this.status = status;
-        this.log = log;
-    }
+// Updates the HTML to match the game state given as JSON.
+function updateHtml(json) {
+    let i = 0;  
 
-    /**
-     * Updates the HTML to match the game state given as JSON.
-     */
-    updateHtml(json) {
-        let i = 0;  
-
-        for (const button of this.grid.getElementsByTagName("button")) {
-            const cellText = json.grid[i];
-            // Set the data-state attribute which drives CSS formatting.
-            button.setAttribute('data-state', cellText);
-            // Set the text contents of the cell.
-            button.textContent = cellText;
-            // Set the disabled state to match whether the cell is full.
-            if (cellText != ' ') {
-                button.setAttribute('disabled', "1");
-            } else {
-                button.removeAttribute('disabled');
-            }
-            i++;
-        }
-    }
-
-    updateStatus(statusText) {
-        this.status.textContent = statusText;
-    }
-
-    addToLog(logText) {
-        if (this.log.childNodes.length >= 5) {
-            this.log.lastChild.remove();
-        }
-        let logstatement = document.createElement("logstatement");
-        logstatement.textContent = logText;
-        this.log.prepend(logstatement);
-    }
-}
-
-/** A controller for a TicTacToe game, managing the connection to the server. */
-class TttController {
-    constructor(view) {
-        this.view = view;
-        this.init();
-    }
-
-    /**
-     * Fetches the game state, updates the UI, and installs click handlers.
-     */
-    async init() {
-        this.handleJsonUrl('/join');
-
-        let i = 0;
-        for (const button of this.view.grid.getElementsByTagName("button")) {
-            const cell = i;
-            button.addEventListener('click', () => {
-                this.handleJsonUrl(`/set/${this.game_id}/${cell}`);
-            });
-            i++;
-        }
-    }
-
-    /**
-     * Fetches the given URL and updates the internal state from the parsed JSON.
-     * 
-     * Keeps polling for updates if the updated state could change remotely.
-     * 
-     * @param {string} url the URL to fetch that will return tictactoe JSON.
-     */
-    async handleJsonUrl(url) {
-        try {
-            let response = await fetch(url);
-            await this.handleJsonResponse(response);
-            // Keep polling the server while the game state could change remotely.
-            if (this.state == "waiting" || (this.state == "playing" && this.next != this.player)) {
-                await this.wait(1000);
-                this.handleJsonUrl(`/game/${this.game_id}`);
-            }
-        } catch (exception) {
-            console.log(exception);
-            this.view.addToLog(exception.toString());
-        }
-    }
-
-    /**
-     * Updates the game state from the JSON response received from a remote HTTP endpoint.
-     *
-     * @param {Response} response the HTTP response from a remote JSON endpoint.
-     */
-    async handleJsonResponse(response) {
-        if (!response.ok) {
-            let error =  await response.text();
-            console.log("Error: " + error);
-            this.view.addToLog(error);
-            return;
-        }
-        const json = await response.json();
-        this.player = json.player;
-        this.next = json.next;
-        this.game_id = json.id;
-        this.state = json.state;
-        this.winner = json.winner;
-        if (this.state == "playing") {
-            const ourOrTheir = this.next == this.player ? "our" : "their";
-            this.view.updateStatus(`${json.state}: ${ourOrTheir} turn`);
-        } else if (this.winner == this.player) {
-            this.view.updateStatus("You won");
-        } else if (this.winner) {
-            this.view.updateStatus("You lost");
-        } else if (this.state == "ended") {
-            this.view.updateStatus("Tie");
+    for (const button of document.querySelectorAll(".grid button")) {
+        const cellText = json.grid[i];
+        // Set the data-state attribute which drives CSS formatting.
+        button.setAttribute('data-state', cellText);
+        // Set the text contents of the cell.
+        button.textContent = cellText;
+        // Set the disabled state to match whether the cell is full.
+        if (cellText != ' ') {
+            button.setAttribute('disabled', "1");
         } else {
-            this.view.updateStatus(json.state);
+            button.removeAttribute('disabled');
         }
-        this.view.updateHtml(json);
-    }
-
-    // wait ms milliseconds
-    wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        i++;
     }
 }
 
-let view = new TttView(document.getElementsByClassName("grid")[0],
-                       document.getElementById("status"),
-                       document.getElementById("log"))
-let controller = new TttController(view);
+function updateStatus(statusText) {
+    document.getElementById("status").textContent = statusText;
+}
+
+function addToLog(logText) {
+    let log = document.getElementById("log")
+    if (log.childNodes.length >= 5) {
+        log.lastChild.remove();
+    }
+    let logstatement = document.createElement("logstatement");
+    logstatement.textContent = logText;
+    log.prepend(logstatement);
+}
+
+let game = {
+    "id": 0,
+    "state": {
+        "progress" : "waiting",
+        "next": "X"
+    },
+    "grid": [ " ", " ", " ", " ", " ", " ", " ", " ", " " ],
+};
+
+/**
+ * Fetches the given URL and updates the internal state from the parsed JSON.
+ * 
+ * Keeps polling for updates if the updated state could change remotely.
+ * 
+ * @param {string} url the URL to fetch that will return tictactoe JSON.
+ */
+async function handleJsonUrl(url) {
+    try {
+        let response = await fetch(url);
+        await handleJsonResponse(response);
+        // Keep polling the server while the game state could change remotely.
+        if (game.state.progress == "waiting"
+             || (game.state.progress == "playing" && game.player != 'you')) {
+            await wait(1000);
+            handleJsonUrl('/game');
+        }
+    } catch (exception) {
+        console.log(exception);
+        addToLog(exception.toString());
+    }
+}
+
+/**
+ * Updates the game state from the JSON response received from a remote HTTP endpoint.
+ *
+ * @param {Response} response the HTTP response from a remote JSON endpoint.
+ */
+async function handleJsonResponse(response) {
+    if (!response.ok) {
+        let error =  await response.text();
+        console.log("Error: " + error);
+        addToLog(error);
+        return;
+    }
+    game = await response.json();
+    if (game.state.progress == "playing") {
+        const ourOrTheir = game.player == "you" ? "our" : "their";
+        updateStatus(`${game.state.progress}: ${ourOrTheir} turn`);
+    } else if (game.winner == game.player) {
+        updateStatus("You won");
+    } else if (game.winner) {
+        updateStatus("You lost");
+    } else if (game.state.progress == "ended") {
+        updateStatus("Tie");
+    } else {
+        updateStatus(game.state.progress);
+    }
+    updateHtml(game);
+}
+
+// Returns a promise that waits ms milliseconds.
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function init() {
+    handleJsonUrl('/game');
+
+    let i = 0;
+    for (const button of document.querySelectorAll(".grid button")) {
+        const cell = i;
+        button.addEventListener('click', () => {
+            handleJsonUrl(`/play/${cell}/${game.color}`);
+        });
+        i++;
+    }
+}
+
+init()
