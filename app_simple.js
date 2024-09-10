@@ -13,8 +13,6 @@ let game = {
         "next": "X"
     },
     "grid": [ " ", " ", " ", " ", " ", " ", " ", " ", " " ],
-    "player_X": "",
-    "player_O": "",
 };
 
 // Returns the user's userid, creating a random
@@ -34,41 +32,41 @@ function getUserId(req, res) {
 function sendGame(req, res) {
     // Join a game that is waiting for players.
     let userid = getUserId(req, res)
-    if (game['player_X'] == "") {
+    if (game.player_X == undefined) {
         // Join game as X
-        game['player_X'] = userid
-    } else if (game['player_O'] == "") {
+        console.log(`User ${userid} joining game as X`)
+        game.player_X = userid
+    } else if (game.player_O == undefined && game.player_X != userid) {
         // Join game as O
-        game['player_O'] = userid
+        console.log(`User ${userid} joining game as O`)
+        game.player_O = userid
     }
     
+    // Create a copy and set the 'color' property
     let copy = structuredClone(game)
-    delete copy['player_X']
-    delete copy['player_O']
-    copy['player'] = 'not you'
-    if (game['player_X'] == userid) {
+    if (game.player_X == userid) {
         // User is already assigned X
-        copy['color'] = 'X'
-        if (game.state.next == 'X') {
-            copy['player'] = 'you'
-        }
-    } else if (game['player_O'] == userid) {
+        copy.color = 'X'
+    } else if (game.player_O == userid) {
         // User is already assigned O
-        copy['color'] = 'O'
-        if (game.state.next == 'O') {
-            copy['player'] = 'you'
-        }
+        copy.color = 'O'
     } else {
         // game already has two other players
+    }
+    // Set the 'yourturn' property if applicable
+    if (copy.state.next == copy.color) {
+        copy.yourturn = true
     }
     res.json(copy)
 }
 
 app.get('/game/', (req, res) => {
+    console.log('/game')
     sendGame(req, res);
 });
 
 app.get('/play/:cell/:color', (req, res) => {
+    console.log('/play')
     // TODO: security
     let cell = req.params['cell'];
     let color = req.params['color'];

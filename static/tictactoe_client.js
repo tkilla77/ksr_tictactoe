@@ -54,7 +54,7 @@ async function handleJsonUrl(url) {
         await handleJsonResponse(response);
         // Keep polling the server while the game state could change remotely.
         if (game.state.progress == "waiting"
-             || (game.state.progress == "playing" && game.player != 'you')) {
+             || (game.state.progress == "playing" && !game.yourturn)) {
             await wait(1000);
             handleJsonUrl('/game');
         }
@@ -78,7 +78,7 @@ async function handleJsonResponse(response) {
     }
     game = await response.json();
     if (game.state.progress == "playing") {
-        const ourOrTheir = game.player == "you" ? "our" : "their";
+        const ourOrTheir = game.yourturn ? "our" : "their";
         updateStatus(`${game.state.progress}: ${ourOrTheir} turn`);
     } else if (game.winner == game.player) {
         updateStatus("You won");
