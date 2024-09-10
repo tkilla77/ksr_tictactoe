@@ -16,7 +16,7 @@ let game = {
 };
 
 // Returns the user's userid, creating a random
-// userid if there is none.
+// userid if there is none, storing it as a cookie.
 function getUserId(req, res) {
     let userid = req.cookies.userid
     if (userid == undefined) {
@@ -27,8 +27,8 @@ function getUserId(req, res) {
 }
 
 // Create a copy of game to return and
-// sets the 'player' entry according to
-// the user id.
+// sets the 'color' and 'yourturn' entries
+// according to the user id.
 function sendGame(req, res) {
     // Join a game that is waiting for players.
     let userid = getUserId(req, res)
@@ -68,6 +68,7 @@ app.get('/game/', (req, res) => {
 app.get('/play/:cell/:color', (req, res) => {
     console.log('/play')
     // TODO: security
+    // TODO: winner detection, end status
     let cell = req.params['cell'];
     let color = req.params['color'];
     if (color != game.state.next) {

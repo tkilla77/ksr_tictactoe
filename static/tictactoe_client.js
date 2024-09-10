@@ -1,3 +1,63 @@
+let game = {
+    "id": 0,
+    "state": {
+        "progress" : "waiting",
+        "next": "X"
+    },
+    "grid": [ " ", " ", " ", " ", " ", " ", " ", " ", " " ],
+};
+
+// Make a play
+async function play(cell) {
+    response = await fetch(`/play/${cell}/${game.color}`);
+    await updateGame(response)
+    poll();
+}
+
+// Polls the server state until it's our turn.
+async function poll() {
+    // Keep polling the server while the game state could change remotely.
+    while (game.state.progress == "waiting"
+            || (game.state.progress == "playing" && !game.yourturn)) {
+        await sleep(1000);
+        response = await fetch('/game');
+        await updateGame(response)
+    }
+}
+
+// Returns a promise that waits ms milliseconds.
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Updates the game state from the JSON response received from a remote HTTP endpoint.
+ *
+ * @param {Response} response the HTTP response from a remote JSON endpoint.
+ */
+async function updateGame(response) {
+    if (!response.ok) {
+        let error =  await response.text();
+        console.log("Error: " + error);
+        addToLog(error);
+        return;
+    }
+    game = await response.json();
+    if (game.state.progress == "playing") {
+        const ourOrTheir = game.yourturn ? "our" : "their";
+        updateStatus(`${game.state.progress}: ${ourOrTheir} turn`);
+    } else if (game.winner == game.color) {
+        updateStatus("You won");
+    } else if (game.winner) {
+        updateStatus("You lost");
+    } else if (game.state.progress == "ended") {
+        updateStatus("Tie");
+    } else {
+        updateStatus(game.state.progress);
+    }
+    updateHtml(game);
+}
+
 // Updates the HTML to match the game state given as JSON.
 function updateHtml(json) {
     let i = 0;  
@@ -32,82 +92,15 @@ function addToLog(logText) {
     log.prepend(logstatement);
 }
 
-let game = {
-    "id": 0,
-    "state": {
-        "progress" : "waiting",
-        "next": "X"
-    },
-    "grid": [ " ", " ", " ", " ", " ", " ", " ", " ", " " ],
-};
-
-/**
- * Fetches the given URL and updates the internal state from the parsed JSON.
- * 
- * Keeps polling for updates if the updated state could change remotely.
- * 
- * @param {string} url the URL to fetch that will return tictactoe JSON.
- */
-async function handleJsonUrl(url) {
-    try {
-        let response = await fetch(url);
-        await handleJsonResponse(response);
-        // Keep polling the server while the game state could change remotely.
-        if (game.state.progress == "waiting"
-             || (game.state.progress == "playing" && !game.yourturn)) {
-            await wait(1000);
-            handleJsonUrl('/game');
-        }
-    } catch (exception) {
-        console.log(exception);
-        addToLog(exception.toString());
-    }
-}
-
-/**
- * Updates the game state from the JSON response received from a remote HTTP endpoint.
- *
- * @param {Response} response the HTTP response from a remote JSON endpoint.
- */
-async function handleJsonResponse(response) {
-    if (!response.ok) {
-        let error =  await response.text();
-        console.log("Error: " + error);
-        addToLog(error);
-        return;
-    }
-    game = await response.json();
-    if (game.state.progress == "playing") {
-        const ourOrTheir = game.yourturn ? "our" : "their";
-        updateStatus(`${game.state.progress}: ${ourOrTheir} turn`);
-    } else if (game.winner == game.player) {
-        updateStatus("You won");
-    } else if (game.winner) {
-        updateStatus("You lost");
-    } else if (game.state.progress == "ended") {
-        updateStatus("Tie");
-    } else {
-        updateStatus(game.state.progress);
-    }
-    updateHtml(game);
-}
-
-// Returns a promise that waits ms milliseconds.
-function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
+// Set up click handlers and start polling.
 async function init() {
-    handleJsonUrl('/game');
-
     let i = 0;
     for (const button of document.querySelectorAll(".grid button")) {
         const cell = i;
-        button.addEventListener('click', () => {
-            handleJsonUrl(`/play/${cell}/${game.color}`);
-        });
+        button.addEventListener('click', () => play(cell));
         i++;
     }
+    poll();
 }
 
 init()
