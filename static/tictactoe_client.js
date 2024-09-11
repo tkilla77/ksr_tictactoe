@@ -17,8 +17,7 @@ async function play(cell) {
 // Polls the server state until it's our turn.
 async function poll() {
     // Keep polling the server while the game state could change remotely.
-    while (game.state.progress == "waiting"
-            || (game.state.progress == "playing" && !game.yourturn)) {
+    while (game.state.progress == "playing" && !game.yourturn) {
         await sleep(1000);
         response = await fetch('/game');
         await updateGame(response)
