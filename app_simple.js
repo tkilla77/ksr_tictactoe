@@ -61,12 +61,12 @@ function sendGame(req, res) {
 }
 
 app.get('/game/', (req, res) => {
-    console.log('/game')
+    console.log(`${req.url} from ${req.socket.remoteAddress}`)
     sendGame(req, res);
 });
 
 app.get('/play/:cell/:color', (req, res) => {
-    console.log('/play')
+    console.log(`${req.url} from ${req.socket.remoteAddress}`)
     // TODO: security
     // TODO: winner detection, end status
     let cell = req.params['cell'];
