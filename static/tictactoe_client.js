@@ -1,7 +1,7 @@
 let game = {
     "id": 0,
     "state": {
-        "progress" : "waiting",
+        "progress" : "playing",
         "next": "X"
     },
     "grid": [ " ", " ", " ", " ", " ", " ", " ", " ", " " ],
